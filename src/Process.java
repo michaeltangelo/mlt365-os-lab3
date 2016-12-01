@@ -41,7 +41,7 @@ public class Process {
 	public boolean processNextActivity() {
 		// if computing
 		if (state == 4) {
-			System.out.printf("Task %d is computing (%d of %d cycles)\n", id, totalComputeCycles-computeCyclesRemaining, totalComputeCycles);
+			// System.out.printf("Task %d is computing (%d of %d cycles)\n", id, totalComputeCycles-computeCyclesRemaining, totalComputeCycles);
 			updateCount();
 			return true;
 		}
@@ -139,7 +139,7 @@ public class Process {
 		else {
 			if (this.state != 6) manager.addToBlocked(this);
 			// System.out.println("Request could not be granted. Task is blocked.");
-			manager.printAllocated();
+			// manager.printAllocated();
 			// add to blocked queue if previously blocked
 			// set state to blocked
 			this.state = 6;
@@ -209,7 +209,7 @@ public class Process {
 	
 	// Immediately aborts the process
 	public void abort() {
-		System.out.println("Aborting process " + this.id + " and removing from manager list.");
+		// System.out.println("Aborting process " + this.id + " and removing from manager list.");
 		this.state = 7;
 		manager.freeAll(id);
 		manager.abortedProcesses.add(this);

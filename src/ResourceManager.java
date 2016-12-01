@@ -172,12 +172,12 @@ public class ResourceManager {
 	public boolean requestIfPossible(int id, int resourceType, int amount) {
 		// check if request is greater than claim
 		if (amount > claim[id-1][resourceType-1]) {
-			System.out.println("Requested resource is greater than claim. Request denied.");
+			// System.out.println("Requested resource is greater than claim. Request denied.");
 			return false;
 		}
 		// check if request is larger than current available resources
 		if (availResources[resourceType-1] < amount) {
-			System.out.println("Not enough resources available. Request denied.");
+			// System.out.println("Not enough resources available. Request denied.");
 			return false;
 		}
 		return true;
@@ -206,7 +206,7 @@ public class ResourceManager {
 	// Removes a process from the list of available processes
 	public void removeProcessFromAvailable(Process p) {
 		if (!availableProcesses.remove(p)) {
-			System.out.println("Process p with id: " + p.id + " could not be removed from manager's process list.");
+			// System.out.println("Process p with id: " + p.id + " could not be removed from manager's process list.");
 			System.exit(1);
 		}
 	}
