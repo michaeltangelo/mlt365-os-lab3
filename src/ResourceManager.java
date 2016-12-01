@@ -1,7 +1,7 @@
-package lab3;
-
 import java.util.ArrayList;
 
+// Resource manager class is an all-aware object that
+// has and maintains a list of all processes required for the algorithm
 public class ResourceManager {
 	protected int numProcesses, numResources;
 	public ArrayList<Process> availableProcesses, allProcesses, processQueue, terminatedProcesses, abortedProcesses;
@@ -28,6 +28,8 @@ public class ResourceManager {
 		claim = new int[numProcesses][numResources];
 	}
 	
+	// Is called at the end of an execution tick
+	// Removes any process in the toRemove queue
 	public void terminateFinishedProcesses() {
 		for (int i = 0; i < toRemove.size(); i++) {
 			Process p = toRemove.get(i);
@@ -43,12 +45,13 @@ public class ResourceManager {
 		toRemove.clear();
 	}
 	
+	// Called at the end of an execution tick
 	// remove blocked processes from the available processes
 	public void updateAvailableProcesses() {
 		for (int i = 0; i < processQueue.size(); i++) {
-			System.out.println("Removing duplicate process");
+			// System.out.println("Removing duplicate process");
 			if (!availableProcesses.remove(processQueue.get(i))) {
-				System.out.println("Failed to remove a blocked process from the available queue.");
+				// System.out.println("Failed to remove a blocked process from the available queue.");
 			}
 		}
 		for (int i = 0; i < abortedProcesses.size(); i++) {
@@ -57,10 +60,11 @@ public class ResourceManager {
 		}
 	}
 	
+	// Aborts the lowest numbered deadlock task
+	// If the task has no resources, abort it all the same
 	public void abortLowestDeadlockedTask() {
 		for (int i = 0; i < allProcesses.size(); i++) {
 			Process p = allProcesses.get(i);
-			System.out.println("STATE!#%!#%!#%: " + p.state);
 			if (p.hasResources()) {
 				p.abort();
 				return;
@@ -74,15 +78,18 @@ public class ResourceManager {
 		}
 	}
 	
+	// Adds a process to the list of available processes
 	public void addToAvailable(Process p) {
 		// add at correct location
 		if (!availableProcesses.contains(p)) availableProcesses.add(p);
 	}
 	
+	// Adds a process to the list of blocked processes
 	public void addToBlocked(Process p) {
 		if (!processQueue.contains(p)) processQueue.add(p);
 	}
 	
+	// Returns true if the process is deadlocked
 	public boolean isDeadlocked() {
 		boolean deadlock = true;
 		// check if any blocked processes' requests can be Request granted
@@ -96,6 +103,7 @@ public class ResourceManager {
 		return deadlock;
 	}
 	
+	// For debugging: Prints the needs of a process
 	public void printProcessNeeds(Process p) {
 		for (int i = 0; i < need[p.id-1].length; i++) {
 			System.out.printf("%d\t", need[p.id-1][i]);
@@ -119,6 +127,8 @@ public class ResourceManager {
 		return true;
 	}
 	
+	// Called at the end of an execution tick
+	// Frees all resources from each process in the freeBuffer
 	public void freeBuffer() {
 //		System.out.println("freeBuffer called.");
 		for (int i = 0; i < toFree.size(); i++) {
@@ -126,7 +136,7 @@ public class ResourceManager {
 			int id = freeBuffer[0];
 			int resourceType = freeBuffer[1];
 			int amount = freeBuffer[2];
-			System.out.println("Releasing Resources from process " + id + ": " + amount + " of resource " + resourceType);
+			// System.out.println("Releasing Resources from process " + id + ": " + amount + " of resource " + resourceType);
 			allocated[id-1][resourceType-1] -= amount;
 			availResources[resourceType-1] += amount;
 			need[id-1][resourceType-1] += amount;
@@ -134,6 +144,7 @@ public class ResourceManager {
 		toFree.clear();
 	}
 	
+	// Add a process to the queue of processes to Free
 	public boolean addToFree(int id, int resourceType, int amount) {
 		// add to buffer to complete at end of tick
 		Integer[] newFreeBuffer = new Integer[3];
@@ -143,7 +154,8 @@ public class ResourceManager {
 		toFree.add(newFreeBuffer);
 		return true;
 	}
-	
+
+	// Adds a claim to the claim[][] while initializing the resource Manager
 	public void addClaim(int id, int resourceType, int amount) {
 //		System.out.printf("Adding Process #%d's claim for amount %d of resource %d\n", id, resourceType, amount);
 		claim[id-1][resourceType-1] = amount;
@@ -151,6 +163,7 @@ public class ResourceManager {
 //		printClaim();
 	}
 	
+	// Queues a process to remove at the end of an execution tick
 	public void queueProcessToRemove(Process p) {
 		toRemove.add(p);
 	}
@@ -170,6 +183,7 @@ public class ResourceManager {
 		return true;
 	}
 	
+	// Returns an available process with the input id
 	public Process getAvailableProcessById(int id) {
 		for (int i = 0; i < availableProcesses.size(); i++) {
 			if (availableProcesses.get(i).id == id) return availableProcesses.get(i);
@@ -177,16 +191,19 @@ public class ResourceManager {
 		return null;
 	}
 	
+	// Adds a resource while initializing the resource Manager
 	public void addResource(int resourceType, int amount) {
 		maxResources[resourceType] = amount;
 		availResources[resourceType] = amount;
 	}
 	
+	// Adds a process while initializing the resource Manager
 	public void addProcess(Process p) {
 		availableProcesses.add(p);
 		allProcesses.add(p);
 	}
 	
+	// Removes a process from the list of available processes
 	public void removeProcessFromAvailable(Process p) {
 		if (!availableProcesses.remove(p)) {
 			System.out.println("Process p with id: " + p.id + " could not be removed from manager's process list.");
@@ -194,6 +211,7 @@ public class ResourceManager {
 		}
 	}
 	
+	// Returns a process with the input id
 	public Process getProcessById(int id) {
 //		System.out.println("getProcessById()");
 		for (int i = 0; i < availableProcesses.size(); i++) {
@@ -204,6 +222,7 @@ public class ResourceManager {
 		return null;
 	}
 	
+	// Adds an activity while initializing the resource Manager	
 	public void addActivity(Activity activity) {
 //		System.out.println("Attempting to find activity with ID: " + activity.getId());
 		Process p = getProcessById(activity.getId());
@@ -217,6 +236,7 @@ public class ResourceManager {
 		}
 	}
 	
+	// Debug print need list
 	public void printNeed() {
 		System.out.println("Needs");
 		System.out.println("-----");
@@ -230,6 +250,7 @@ public class ResourceManager {
 		System.out.println();
 	}
 	
+	// debug print allocated list
 	public void printAllocated() {
 		System.out.println("Allocated");
 		System.out.println("---------");
@@ -243,6 +264,7 @@ public class ResourceManager {
 		System.out.println();
 	}
 	
+	// debug print all claims
 	public void printClaim() {
 		System.out.println("Claims");
 		System.out.println("------");
@@ -256,6 +278,7 @@ public class ResourceManager {
 		System.out.println();
 	}
 
+	// debug print the two queues of processes (blocked or available)
 	public void printProcesses() {
 		System.out.println("Processes");
 		System.out.println("---------");
@@ -271,6 +294,7 @@ public class ResourceManager {
 		}
 	}
 	
+	// A verbose debug print of the current state of the resource manager
 	public void printSelf() {
 		System.out.println("Resource Manager Queues");
 		System.out.println("-----------------------");
@@ -286,6 +310,7 @@ public class ResourceManager {
 		System.out.println("-----------------------");
 	}
 	
+	// prints results for the end of the algorithm
 	public void printResults() {
 		int[] total = new int[]{0,0};
 		for (int i = 0; i < allProcesses.size(); i++) {
@@ -300,6 +325,7 @@ public class ResourceManager {
 		System.out.printf("Total|\t%d\t%d\t%.0f%%\n", total[0], total[1], waitPercentage*100);
 	}
 	
+	// debug prints available resources
 	public void printAvailResources() {
 		System.out.println("Available Resources");
 		System.out.println("-------------------");
@@ -308,6 +334,7 @@ public class ResourceManager {
 		}
 	}
 	
+	// debug prints the blocked queue
 	public void printProcessQueue() {
 		System.out.print("Process Queue       | ");
 		for (int i = 0; i < processQueue.size(); i++) {
@@ -316,6 +343,7 @@ public class ResourceManager {
 		System.out.println();
 	}
 	
+	// debug prints all terminated processes
 	public void printTerminatedProcesses() {
 		System.out.print("Process Queue       | ");
 		for (int i = 0; i < terminatedProcesses.size(); i++) {
@@ -324,6 +352,7 @@ public class ResourceManager {
 		System.out.println();
 	}
 	
+	// debug prints all available processes
 	public void printAvailableProcesses() {
 		System.out.print("Available Processes | ");
 		for (int i = 0; i < availableProcesses.size(); i++) {

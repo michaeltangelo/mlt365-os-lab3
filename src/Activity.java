@@ -1,5 +1,5 @@
-package lab3;
-
+// This class represents an activity (initialize, request, release, etc)
+// It contains the information parsed from the input file
 public class Activity {
 	private String name;
 	private int id, resource, amount;
@@ -11,6 +11,7 @@ public class Activity {
 		this.setAmount(c);
 	}
 	
+	// Prints the activity
 	public void printSelf() {
 		System.out.printf("%s: %d | %d | %d\n", name, id, resource, amount);
 	}

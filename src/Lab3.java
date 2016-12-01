@@ -1,17 +1,16 @@
-package lab3;
-
 import java.io.File;
 import java.io.FileNotFoundException;
-//import java.util.ArrayList;
 import java.util.Scanner;
 
 public abstract class Lab3 {
 	protected String fileName;
 	public ResourceManager manager;
+
 	Lab3(String fileName) {
 		this.fileName = fileName;
 	}
-	
+
+	// Parse the input and create new instance of a ResourceManager	
 	public void init() throws FileNotFoundException {
 //		System.out.println("Initializing simulation.");
 		File file = new File(fileName);
@@ -50,15 +49,6 @@ public abstract class Lab3 {
 		sc.close();
 	}
 	
+	// To be implemented by the specific type of algorithm (ORM or Bankers)
 	public abstract void exec();
-	
-//	public void printActivities() {
-//		for (int i = 0; i < activities.size(); i++) {
-//			System.out.printf("Process #%d has %d activities:\n", i, activities.get(i).size());
-//			for (int j = 0; j < activities.get(i).size(); j++) {
-//				activities.get(i).get(j).printSelf();
-//			}
-//			System.out.println();
-//		}
-//	}
 }

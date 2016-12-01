@@ -1,8 +1,7 @@
-package lab3;
-
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
+// Represents the Bankers algorithm for lab3
 public class Bankers extends Lab3 {
 	private int cycleNum, seen[];
 	
@@ -13,14 +12,16 @@ public class Bankers extends Lab3 {
 		seen = new int[manager.numProcesses];
 	}
 	
+	// Called right after initialization
+	// Aborts all processes with claims that exceed resource allotment
 	private void preAbortOverclaimingProcesses() {
-		manager.printAvailResources();
+		// manager.printAvailResources();
 		for (int i = 0; i < manager.claim.length; i++) {
 //			System.out.printf("Process #%d claims: ", i);
 			for (int j = 0; j < manager.claim[i].length; j++) {
 				Process p = manager.getProcessById(i+1);
 				if (manager.claim[i][j] > manager.maxResources[j]) {
-					System.out.println("Aborting process with id#"+(i+1));
+					// System.out.println("Aborting process with id#"+(i+1));
 					p.abort();
 				}
 //				System.out.printf("%d ", manager.claim[i][j]);
@@ -29,6 +30,7 @@ public class Bankers extends Lab3 {
 		}
 	}
 	
+	// Represents one cpu cycle for all processes
 	private void tickProcesses() {
 		if (cycleNum == 1) {
 			preAbortOverclaimingProcesses();
@@ -36,14 +38,14 @@ public class Bankers extends Lab3 {
 //		if (cycleNum == 10) System.exit(1);
 		cycleNum++;
 		seen = new int[manager.numProcesses];
-		System.out.printf("\n\n\n=====================\n===== Cycle %d-%d =====\n=====================\n", cycleNum-1, cycleNum);
-		manager.printAvailResources();
-		System.out.println();
+		// System.out.printf("\n\n\n=====================\n===== Cycle %d-%d =====\n=====================\n", cycleNum-1, cycleNum);
+		// manager.printAvailResources();
+		// System.out.println();
 		
 		// Check blocked queue first
 		ArrayList<Process> newProcessQueue = new ArrayList<Process>();
 		while (!manager.processQueue.isEmpty()) {
-			System.out.println("Found a blocked task");
+			// System.out.println("Found a blocked task");
 			// if it is safe to grant resources to the process (meaning all tasks can finish), process activity
 			Process p = manager.processQueue.remove(0);
 			if (seen[p.id-1] < 1) {
@@ -55,13 +57,13 @@ public class Bankers extends Lab3 {
 					p.updateCount();
 					if (p.state != 6) manager.addToBlocked(p);
 					p.state = 6;
-					System.out.printf("Task %d's is blocked and its request cannot be granted (not safe). So %d is blocked\n", p.id, p.id);
+					// System.out.printf("Task %d's is blocked and its request cannot be granted (not safe). So %d is blocked\n", p.id, p.id);
 					newProcessQueue.add(p);
 				}
 				seen[p.id-1] = 1;
 			}
 			else {
-				System.out.println("Process with id: " + p.id + " was seen before. Skipping");
+				// System.out.println("Process with id: " + p.id + " was seen before. Skipping");
 				continue;
 			}
 		}
@@ -79,12 +81,12 @@ public class Bankers extends Lab3 {
 					p.blocked++;
 					if (p.state != 6) manager.addToBlocked(p);
 					p.state = 6;
-					System.out.printf("Task %d's request cannot be granted (not safe). So %d is blocked\n", p.id, p.id);
+					// System.out.printf("Task %d's request cannot be granted (not safe). So %d is blocked\n", p.id, p.id);
 				}
 				seen[p.id-1] = 1;
 			}
 			else {
-				System.out.println("Process with id: " + p.id + " was seen before. Skipping");
+				// System.out.println("Process with id: " + p.id + " was seen before. Skipping");
 				continue;
 			}
 		}
@@ -92,26 +94,32 @@ public class Bankers extends Lab3 {
 		manager.updateAvailableProcesses();
 		manager.terminateFinishedProcesses();
 	}
+
+	// Runs the entire algorithm and doesn't stop until all processes are either aborted or terminated
 	public void exec() {
 		// Go through each process and attempt to complete the activity
 		
 		while (manager.terminatedProcesses.size() + manager.abortedProcesses.size() < manager.numProcesses) {
 			tickProcesses();
 		}
-		System.out.println("All processes have terminated.");
-		manager.printResults();
+		// System.out.println("All processes have terminated.");
+		// manager.printResults();
 	}
 	
+	// returns true if a request does not exceed the process's claim
 	public boolean isRequestUnderClaim(Activity a, Process p) {
 		if (manager.claim[p.id-1][a.getResource()-1] < a.getAmount() + manager.allocated[p.id-1][a.getResource()-1]) {
-			System.out.printf("Task with id #%d's request exceeds its claim; aborting.\n", p.id);
+			// System.out.printf("Task with id #%d's request exceeds its claim; aborting.\n", p.id);
 			return false;
 		}
 		return true;
 	}
 	
+	// deadlock detection algorithm
+	// Simulates granting a process a resource and then checks
+	// if all processes can finish 
 	public boolean isSafe(Process p) {
-		System.out.println("Is safe called. Process id: " + p.id);
+		// System.out.println("Is safe called. Process id: " + p.id);
 		// If all processes can finish, then it is safe to grant request
 		boolean[] canFinish = new boolean[manager.numProcesses];
 		for (int i = 0; i < canFinish.length; i++) canFinish[i] = false;
@@ -127,10 +135,10 @@ public class Bankers extends Lab3 {
 			return true;
 		}
 		if (manager.terminatedProcesses.contains(p) || manager.toRemove.contains(p)) {
-			System.out.println("detecting a terminated process with id : " + p.id);
+			// System.out.println("detecting a terminated process with id : " + p.id);
 			return true;
 		}
-		System.out.printf("Simulating granting process #%d %d unit of resource %d\n", p.id-1, a.getAmount(), a.getResource());
+		// System.out.printf("Simulating granting process #%d %d unit of resource %d\n", p.id-1, a.getAmount(), a.getResource());
 //		int[][] needs = p.manager.need.clone();
 //		int[] available = p.manager.availResources.clone();
 		int[][] needs = new int[p.manager.numProcesses][p.manager.numResources];
@@ -154,7 +162,7 @@ public class Bankers extends Lab3 {
 		int resourceType = a.getResource();
 		int amount = a.getAmount();
 		if (available[resourceType-1] < 1) {
-			System.out.println("Not enough resources available to complete request. Blocking.");
+			// System.out.println("Not enough resources available to complete request. Blocking.");
 			return false;
 		}
 		available[resourceType-1] -= amount;
@@ -221,11 +229,12 @@ public class Bankers extends Lab3 {
 				return false;
 			}
 		}
-		System.out.println("All requests can be satisfied. State is SAFE!");
-		System.out.println();
+		// System.out.println("All requests can be satisfied. State is SAFE!");
+		// System.out.println();
 		return true;
 	}
 	
+	// debug print all process needs
 	private void printNeeds(int[][] need) {
 		System.out.println("Needs");
 		System.out.println("-----");
@@ -239,6 +248,7 @@ public class Bankers extends Lab3 {
 		System.out.println();
 	}
 	
+	// print available resources
 	private void printAvailable(int[] availResources) {
 		System.out.println("Available Resources");
 		System.out.println("-------------------");

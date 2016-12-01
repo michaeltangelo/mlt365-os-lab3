@@ -1,11 +1,7 @@
-package lab3;
-
-
-// check to see if process correctly goes to aborted processes after aborting
-// make sure to remove the aborted process from the BLOCKED queue as WELL as the available queue
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
+// Represents an optimistic resource manager for lab3
 public class ORM extends Lab3 {
 	private int cycleNum, seen[];
 	
@@ -16,18 +12,19 @@ public class ORM extends Lab3 {
 		seen = new int[manager.numProcesses];
 	}
 	
+	// Represents one cpu cycle for all processes
 	private void tickProcesses() {
 		cycleNum++;
 		seen = new int[manager.numProcesses];
 		boolean deadlock = true;
-		System.out.printf("\n\n\n=====================\n===== Cycle %d-%d =====\n=====================\n", cycleNum-1, cycleNum);
-		manager.printAvailResources();
-		System.out.println();
+		// System.out.printf("\n\n\n=====================\n===== Cycle %d-%d =====\n=====================\n", cycleNum-1, cycleNum);
+		// manager.printAvailResources();
+		// System.out.println();
 		
 		// Check blocked queue first
 		ArrayList<Process> newProcessQueue = new ArrayList<Process>();
 		while (!manager.processQueue.isEmpty()) {
-			System.out.println("Found a blocked task");
+			// System.out.println("Found a blocked task");
 			Process p = manager.processQueue.remove(0);
 			if (seen[p.id-1] < 1) { // if process has never been seen before in this cycle
 				boolean success = p.processNextActivity();
@@ -36,7 +33,7 @@ public class ORM extends Lab3 {
 				seen[p.id-1] = 1;
 			}
 			else {
-				System.out.println("Process with id: " + p.id + " was seen before. Skipping");
+				// System.out.println("Process with id: " + p.id + " was seen before. Skipping");
 				continue;
 			}
 		}
@@ -54,7 +51,7 @@ public class ORM extends Lab3 {
 				seen[nextProcess.id-1] = 1;
 			}
 			else {
-				System.out.println("Process with id: " + nextProcess.id + " was seen before. Skipping");
+				// System.out.println("Process with id: " + nextProcess.id + " was seen before. Skipping");
 				continue;
 			}
 		}
@@ -64,19 +61,22 @@ public class ORM extends Lab3 {
 		
 		if (deadlock) {
 			while (manager.isDeadlocked()) {
-				System.out.println("Deadlock detected. Aborting lowest task.");
+				// System.out.println("Deadlock detected. Aborting lowest task.");
 				manager.abortLowestDeadlockedTask();
-				manager.printSelf();
+				// manager.printSelf();
 			}
 //			System.exit(1);
 		}
 	}
+
+	// Runs the entire algorithm and doesn't stop until all processes are either aborted or terminated
 	public void exec() {
 		// Go through each process and attempt to complete the activity
 		while (manager.terminatedProcesses.size() + manager.abortedProcesses.size() < manager.numProcesses) {
 			tickProcesses();
 		}
-		System.out.println("All processes have terminated.");
-		manager.printResults();
+		// System.out.println("All processes have terminated.");
+		// manager.printResults();
 	}
 }
+

@@ -1,11 +1,9 @@
-package lab3;
-
 import java.io.FileNotFoundException;
 
 public class Main {
-	
-	
+
 	public static void main(String[] args) throws FileNotFoundException {
+		// parse command line args
 		String file = "";
 		if (args.length != 1) {
 			System.out.println("An input file is required.");
@@ -15,11 +13,15 @@ public class Main {
 			file = args[0];
 		}
 		
+		// Instance of Optimistic Resource Manager
 		Lab3 orm = new ORM(file);
+
+		// Instance of Bankers
 		Lab3 bankers = new Bankers(file);
+		
 		orm.exec();
 		bankers.exec();
-		System.out.println("\n\n\n\n\n");
+		
 		System.out.println("-----------");
 		System.out.println("ORM RESULTS");
 		System.out.println("-----------");

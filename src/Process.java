@@ -1,8 +1,10 @@
-package lab3;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+// Process class represents a single process in the algorithm
+// It tracks how many cycles it has completed 
+// and also maintains its state (listed below)
+// All processes have a reference to the (same) ResourceManager instance
 public class Process {
 	
 	// States:
@@ -20,7 +22,6 @@ public class Process {
 	public ResourceManager manager;
 	private int computeCyclesRemaining, totalComputeCycles;
 
-	
 	Process(ResourceManager manager, int id) {
 		this.activities = new LinkedList<Activity>();
 		this.manager = manager;
@@ -31,10 +32,12 @@ public class Process {
 		this.totalComputeCycles = 0;
 	}
 	
+	// Adds an activity to the activity queue
 	public void addActivity(Activity a) {
 		activities.add(a);
 	}
 	
+	// Peeks the next activity and processes it appropriately
 	public boolean processNextActivity() {
 		// if computing
 		if (state == 4) {
@@ -59,27 +62,27 @@ public class Process {
 		boolean success = false;
 		switch (a.getName()) {
 			case "initiate":
-				System.out.println("Initializing process " + id);
+				// System.out.println("Initializing process " + id);
 				success = initiate(a);
 				break;
 			case "request":
-				System.out.printf("process #%d requesting %d units of resource %d\n", id-1, a.getAmount(), a.getResource());
+				// System.out.printf("process #%d requesting %d units of resource %d\n", id-1, a.getAmount(), a.getResource());
 				success = request(a);
 				break;
 			case "release":
-				System.out.printf("process #%d releasing %d units of resource %d\n", id-1, a.getAmount(), a.getResource());
+				// System.out.printf("process #%d releasing %d units of resource %d\n", id-1, a.getAmount(), a.getResource());
 				success = release(a);
 				break;
 			case "terminate":
-				System.out.println(id+"terminate case called.");
+				// System.out.println(id+"terminate case called.");
 				success = terminate();
 				break;
 			case "compute":
-				System.out.print("Task " + id + " computes ");
+				// System.out.print("Task " + id + " computes ");
 				success = compute(a);
 				break;
 			default:
-				System.out.println("Action unknown. Terminating.");
+				// System.out.println("Action unknown. Terminating.");
 				System.exit(1);
 				break;
 		}
@@ -100,6 +103,7 @@ public class Process {
 		}
 	}
 	
+	// Updates the process's count depending on its state
 	public void updateCount() {
 		if (state != 5) this.count++;
 		if (state == 6) this.blocked++;
@@ -111,17 +115,20 @@ public class Process {
 		}
 	}
 	
+	// Used in initializing the process
 	private boolean initiate(Activity a) {
 		this.state = 1;
 		manager.addClaim(this.id, a.getResource(), a.getAmount());
 		return true;
 	}
 	
+	// Makes a request to the resource manager for a specific number of resources
+	// Handles state change depending on whether or not the request is granted
 	private boolean request(Activity a) {
 		// make a request to the manager with process id, resource type, and amount
 		boolean granted = manager.requestIfPossible(this.id, a.getResource(), a.getAmount());
 		if (granted) {
-			System.out.println("Request granted.");
+			// System.out.println("Request granted.");
 			this.state = 2;
 			if (manager.acquire(this.id, a.getResource(), a.getAmount())) {
 //				manager.printAllocated();
@@ -131,7 +138,7 @@ public class Process {
 		}
 		else {
 			if (this.state != 6) manager.addToBlocked(this);
-			System.out.println("Request could not be granted. Task is blocked.");
+			// System.out.println("Request could not be granted. Task is blocked.");
 			manager.printAllocated();
 			// add to blocked queue if previously blocked
 			// set state to blocked
@@ -140,38 +147,44 @@ public class Process {
 		}
 	}
 	
+	// Checks to see if the next request is possible
 	public boolean isNextRequestGrantable() {
 		Activity a = activities.peek();
 		boolean grantable = manager.requestIfPossible(this.id, a.getResource(), a.getAmount());
 		return grantable;
 	}
 	
+	// Handles the release option for an Activity
 	private boolean release(Activity a) {
 		this.state = 3;
 		if (manager.addToFree(this.id, a.getResource(), a.getAmount())) return true;
 		else return false;
 	}
 	
+	// Handles the terminate option for an Activity
 	public boolean terminate() {
-		System.out.println("Terminating process " + this.id + " and removing from manager list.");
+		// System.out.println("Terminating process " + this.id + " and removing from manager list.");
 		this.state = 5;
 		manager.queueProcessToRemove(this);
 		manager.need[this.id-1] = new int[manager.numResources];
 		return true;
 	}
-	
+
+	// Handles the compute option for an Activity	
 	private boolean compute(Activity a) {
 		this.state = 4;
 		this.totalComputeCycles = a.getResource();
 		this.computeCyclesRemaining = this.totalComputeCycles-1;
-		System.out.printf("(%d of %d cycles)\n", this.totalComputeCycles - this.computeCyclesRemaining, this.totalComputeCycles);
+		// System.out.printf("(%d of %d cycles)\n", this.totalComputeCycles - this.computeCyclesRemaining, this.totalComputeCycles);
 		return true;
 	};
 	
+	// Prints self (for debugging)
 	public void printSelf() {
 		System.out.printf("I am Process #%d and have %d activities remaining.\n", this.id, activities.size());
 	}
 	
+	// Used to print final results of the algorithm
 	public int[] printResults() {
 		int[] results = new int[2];
 		float waitPercentage = (float)this.blocked/this.count;
@@ -189,10 +202,12 @@ public class Process {
 		return results;
 	}
 	
+	// returns true if the process is currently blocked
 	public boolean isBlocked() {
 		return this.id == 6 ? true : false;
 	}
 	
+	// Immediately aborts the process
 	public void abort() {
 		System.out.println("Aborting process " + this.id + " and removing from manager list.");
 		this.state = 7;
@@ -202,6 +217,7 @@ public class Process {
 		manager.processQueue.remove(this);
 	}
 	
+	// Checks whether or not the process has allocated resources
 	public boolean hasResources() {
 		for (int i = 0; i < manager.allocated[id-1].length; i++) {
 			if (manager.allocated[id-1][i] > 0) return true;

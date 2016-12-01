@@ -1,0 +1,30 @@
+Michael Tan Lab03 Operating Systems Fall 2016
+Gottlieb
+
+METHOD: Accept a command line argument giving the name of the input file
+
+Folder: mlt365-os-lab03
+	|-contains
+		|- src - folder containing .java files
+		|- bin - folder that contains the compiled .java files
+		|- input - contains input-#
+		|- README
+		|- makefile - for compilation running and management. Instructions below
+
+# Usage:
+# 	From any terminal:
+#
+# 	> cd mlt365-os-lab03
+#
+# 	> make 			-- this will compile all the Java programs in src.
+# 				   Note that all the .class files will be put
+# 				   in a folder called "bin".  If bin does not
+# 				   exist, it will first create bin.
+# 	> make run		-- this will run the main program: (Avoid! There MUST be an argument for textfile name)
+# 	> make run args=“input/input-1.txt”
+# 				-- this will run the main program 
+# 				   with the indicated command line arguments
+#	> make clean		-- removes any compiled programs (cleans bin folder)
+#	> make zip		-- creates the zip file mlt365-lab03.zip for submission
+#				   (the zip file will be found in the parent folder,
+#				   i.e., "..")
